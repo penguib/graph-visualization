@@ -9,10 +9,10 @@ class Pivot {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.start = false;
-        this.end = false;
-        this.value = Infinity;
-        this.visited = false;
+
+        this.src = false;
+        this.target = false;
+
         this.uuid = generateUniqSerial();
         this.index = null;
     }

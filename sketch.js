@@ -1,11 +1,7 @@
-const shortcutGraph = new Graph([], [], {r: 255, g: 0, b: 0});
-const routeGraph = new Graph([], [], {r: 0, g: 0, b: 128});
-let combinedGraph = new Graph([], [], {r: 255, g: 255, b: 128});
+const shortcutGraph = new Graph("#ff0000");
+const routeGraph = new Graph("#000088");
+let combinedGraph = new Graph("#fcba03");
 
-let startNode = null;
-let endNode = null;
-
-const nodeRadius = 10;
 let singleNode = null;
 let clickedPivot = null;
 let drawMode = 0;
@@ -16,7 +12,7 @@ function setup() {
 }
 
 function draw() {
-    background(220);
+    background("#222222");
     if (cgraphs === 0) {
         shortcutGraph.draw();
         routeGraph.draw();
@@ -33,8 +29,11 @@ function withinEllipse(x1, y1, x2, y2, r) {
 function combineGraphs() {
     combinedGraph.edges.push(...routeGraph.edges);
     combinedGraph.edges.push(...shortcutGraph.edges);
-    routeGraph.pivots[0].start = true;
-    routeGraph.pivots[routeGraph.pivots.length - 1].end = true;
+
+    // First and last of the route graph should the the source and target respectfully
+    routeGraph.pivots[0].src = true;
+    routeGraph.pivots[routeGraph.pivots.length - 1].target = true;
+
     combinedGraph.pivots = [...routeGraph.pivots, ...shortcutGraph.pivots]
 
     for (let rpivot of routeGraph.pivots) {
@@ -42,14 +41,6 @@ function combineGraphs() {
             combinedGraph.addEdge(new Edge(spivot, rpivot));
         }
     }
-    // console.log(combinedGraph.edges)
-}
-
-function print_array(arr) {
-    for (let a of arr) {
-        console.log(a.uuid)
-    }
-    console.log("--------")
 }
 
 function findShortestPath() {
@@ -87,7 +78,22 @@ function keyPressed() {
             {
                 let path = findShortestPath();
                 console.log(path.prev)
-                console.log(extractShortestPath(path.prev))
+                let p = extractShortestPath(path.prev)
+                for (let i = 0; i < p.length; i++) {
+                    if (i == p.length - 1)
+                        break;
+                    let e = combinedGraph.getEdge(p[i], p[i+1]);
+                    e.setColor("#00ff00")
+                }
+                return;
+            }
+        case BACKSPACE:
+            {
+                combinedGraph.clear();
+                routeGraph.clear();
+                shortcutGraph.clear();
+                drawMode = 0;
+                cgraphs = 0;
                 return;
             }
         default:

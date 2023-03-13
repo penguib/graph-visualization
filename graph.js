@@ -1,23 +1,30 @@
 class Graph {
-    constructor(edges = [], pivots = [], color) {
-        this.edges = edges;
-        this.pivots = pivots
+    constructor(color) {
+        this.edges = [];
+        this.pivots = []; 
         this.radius = 30;
         this.color = color;
     }
 
+    _getNodeColor(node) {
+        if (node.src)
+            return "#00ff00"
+        if (node.target)
+            return "#ff0000"
+
+        return null;
+    }
+
     draw() {
         for (let edge of this.edges) {
-            stroke(1);
-            //strokeWeight(edge.weight / 25);
+            stroke(edge.color)
+            strokeWeight(2)
             line(edge.a.x, edge.a.y, edge.b.x, edge.b.y);
+            
+            noStroke();
 
-            if (edge.a.start)
-                fill(`#00ff00`);
-            else if (edge.a.end)
-                fill("#ff0000");
-            else
-                fill(`rgba(${this.color.r},${this.color.g},${this.color.b},1)`);
+            let aColor = this._getNodeColor(edge.a);
+            fill((aColor) ? aColor : this.color)
             ellipse(edge.a.x, edge.a.y, this.radius, this.radius);
 
             if (edge.a.index != null) {
@@ -25,14 +32,10 @@ class Graph {
                 text(edge.a.index, edge.a.x, edge.a.y)
             }
 
-            if (edge.b.start)
-                fill(`#00ff00`);
-            else if (edge.b.end)
-                fill("#ff0000");
-            else
-                fill(`rgba(${this.color.r},${this.color.g},${this.color.b},1)`);
-
+            let bColor = this._getNodeColor(edge.b);
+            fill((bColor) ? bColor : this.color)
             ellipse(edge.b.x, edge.b.y, this.radius, this.radius);
+
             if (edge.b.index != null) {
                 fill("#000000")
                 text(edge.b.index, edge.b.x, edge.b.y)
@@ -52,12 +55,12 @@ class Graph {
         return this.pivots.find(x => x.uuid === uuid)
     }
 
-    getStartPivot() {
-        return this.pivots[0]
+    getTargetPivot() {
+        return this.pivots.find(x => x.target)
     }
 
-    getTargetPivot() {
-        return this.pivots.find(x => x.end)
+    getEdge(i, j) {
+        return this.edges.find(x => (x.a.uuid === i || x.b.uuid === i) && (x.a.uuid === j || x.b.uuid === j))
     }
 
     clear() {
@@ -70,7 +73,7 @@ class Graph {
         let prev = {};
         let dist = {};
         let Q = []
-        let src = combinedGraph.pivots.find(x => x.start)
+        let src = combinedGraph.pivots.find(x => x.src)
 
         let index = 0;
         for (let vertex of combinedGraph.pivots) {
